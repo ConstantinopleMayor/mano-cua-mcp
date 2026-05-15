@@ -139,6 +139,10 @@ MCP Server 负责接收 LLM 的 tool call → 调用 `executor.py`（mss+pynput+
 
 相较[上游 mano-skill](https://github.com/Mininglamp-AI/mano-skill)（Qwen3-VL 专用、macOS 为主），本方案使用通用 MCP 协议，适配任何支持 tool_use 的 LLM（Claude、GPT、DeepSeek 等）。
 
+## 致谢
+
+本项目的设计受 [Mininglamp-AI/mano-skill](https://github.com/Mininglamp-AI/mano-skill) 启发。
+
 ## 许可证
 
 MIT
