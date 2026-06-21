@@ -4,7 +4,8 @@
 
 ## 特性
 
-- **12 个 GUI 操作工具** — 点击、右键、双击、拖拽、滚动、输入、快捷键、组合键点击等
+- **17 个 GUI 操作工具** — 点击、右键、双击、拖拽、滚动、输入、快捷键、组合键点击等
+- **图像追踪绘制** — `trace_image` 从图片自动提取轮廓并绘制到画图中，支持两种追踪模式
 - **自动截图返回** — 每个动作执行后可选择自动截图返回给 Agent
 - **可选截图开关** — `screenshot=False` 跳过 2s 等待和截图，适合多步连续操作
 - **多步批量执行** — 一次发出多个 tool_call，中间不截图，省 Token
@@ -83,6 +84,11 @@ Copy-Item -Path "SKILL.md" -Destination "$env:USERPROFILE\.agents\skills\mano-cu
 | `wait(seconds)` | 秒数 | 等待后截图（任务开始用 0 看状态） |
 | `open_app(name, screenshot?)` | 应用名 | 打开应用，默认等 5s 截图 |
 | `open_url(url, screenshot?)` | URL | 浏览器打开链接，默认等 2s 截图 |
+| `freehand_draw(x, y, screenshot?)` | 等长数组 | 多点自由绘制，适合签名、复杂轨迹 |
+| `trace_image(path, contour_ratio?, mode?, threshold1?, threshold2?)` | 文件路径 + 参数 | 从图片提取轮廓并绘制到画图（支持 `m-path` / `contour` 两种模式） |
+| `preview(path, mode?, threshold1?, threshold2?)` | 文件路径 + 参数 | 预览边缘检测效果（不画画），用于调参 |
+| `calibrate(screenshot?)` | — | 自动检测画图画布在屏幕上的位置 |
+| `stop_drawing(screenshot?)` | — | 紧急停止当前绘制操作 |
 
 **`screenshot` 参数**（默认 `True`）：
 - `screenshot=True`：动作后等待 2s + 截图返回（`TextContent + ImageContent`）
@@ -142,6 +148,7 @@ MCP Server 负责接收 LLM 的 tool call → 调用 `executor.py`（mss+pynput+
 ## 致谢
 
 本项目的设计受 [Mininglamp-AI/mano-skill](https://github.com/Mininglamp-AI/mano-skill) 启发。
+图像追踪绘制功能参考了 [ninthseason/drawinline](https://github.com/ninthseason/drawinline)（Canny 边缘检测 + 搜索算法生成笔画）的设计思路，并在此基础上改进了双边滤波预处理、4 向优先贪心追踪等。
 
 ## 许可证
 
