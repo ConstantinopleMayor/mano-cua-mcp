@@ -21,6 +21,7 @@ from PIL import ImageDraw, ImageFont
 import mss
 import screeninfo
 from pynput import keyboard, mouse
+import pyautogui
 
 SCREENSHOTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "screenshots")
 SCALE = 1000
@@ -178,6 +179,74 @@ def left_click_drag(start_x: float, start_y: float, end_x: float, end_y: float) 
     mouse_ctrl.press(mouse.Button.left)
     mouse_ctrl.position = (ex, ey)
     mouse_ctrl.release(mouse.Button.left)
+
+
+_FREEHAND_DURATION = 0.002  # seconds per drag segment (tunable: slower=more reliable)
+
+# 紧急停止标志：用于中断正在进行的绘制
+_stop_requested = False
+_esc_listener = None
+
+
+def _start_esc_listener():
+    """启动全局 Escape 键监听（通过 pynput）。"""
+    global _esc_listener, _stop_requested
+    if _esc_listener is not None:
+        return
+    from pynput import keyboard
+    def _on_press(key):
+        global _stop_requested
+        try:
+            if key == keyboard.Key.esc:
+                _stop_requested = True
+        except Exception:
+            pass
+    _esc_listener = keyboard.Listener(on_press=_on_press)
+    _esc_listener.daemon = True
+    _esc_listener.start()
+
+
+def _is_escape_pressed() -> bool:
+    """备用方案：用 ctypes 检查 Escape 键状态。"""
+    try:
+        import ctypes
+        return (ctypes.windll.user32.GetAsyncKeyState(0x1B) & 0x8000) != 0
+    except Exception:
+        return False
+
+def request_stop() -> None:
+    """请求停止当前绘制"""
+    global _stop_requested
+    _stop_requested = True
+
+def clear_stop() -> None:
+    """清除停止标志"""
+    global _stop_requested
+    _stop_requested = False
+
+
+def freehand_draw(x: list[float], y: list[float]) -> None:
+    if len(x) != len(y) or len(x) < 2:
+        raise ValueError("x and y must have same length and at least 2 points")
+    points = [scale_pos(xi, yi) for xi, yi in zip(x, y)]
+
+    global _stop_requested
+    _start_esc_listener()
+    _stop_requested = False
+
+    # mouseDown 按住 + dragTo 循环
+    pyautogui.FAILSAFE = False  # 禁用角落 FailSafe（改用 Escape 停止）
+    pyautogui.PAUSE = 0.001
+
+    try:
+        pyautogui.moveTo(points[0][0], points[0][1])
+        pyautogui.mouseDown(button='left')
+        for px, py in points[1:]:
+            if _stop_requested or _is_escape_pressed():
+                break
+            pyautogui.dragTo(px, py, button='left', duration=_FREEHAND_DURATION)
+    finally:
+        pyautogui.mouseUp(button='left')
 
 
 def scroll(x: float, y: float, scroll_x: int = 0, scroll_y: int = -3) -> None:
