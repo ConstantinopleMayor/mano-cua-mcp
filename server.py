@@ -32,8 +32,8 @@ def _with_screenshot(action_name: str, action_fn, *args, screenshot: bool = True
     time.sleep(2)
     b64, filepath = gui.screenshot()
     return [
-        # ImageContent(type="image", data=b64, mimeType="image/png"),  # TODO: OpenCode v1.14.47-48 ImageContent 渲染回归，修复后取消注释
-        TextContent(type="text", text=f"{action_name} 并截图 → {filepath}"),
+        ImageContent(type="image", data=b64, mimeType="image/png"),
+        TextContent(type="text", text=action_name),
     ]
 
 
@@ -162,13 +162,9 @@ def trace_image(
                 time.sleep(0.02)  # 给 Paint 时间渲染当前轮廓
     time.sleep(2)
     b64, filepath = gui.screenshot()
-    # 拼结果文本，包含边缘图路径
-    parts = [f"追踪图片 {n_actual}/{total} 个轮廓 ({info['image_size']}) → {filepath}"]
-    debug_paths = info.get("debug_paths", {})
-    if "edges" in debug_paths:
-        parts.append(f"边缘图: {debug_paths['edges']}")
     return [
-        TextContent(type="text", text="\n".join(parts)),
+        ImageContent(type="image", data=b64, mimeType="image/png"),
+        TextContent(type="text", text=f"追踪图片 {n_actual}/{total} 个轮廓 ({info['image_size']})"),
     ]
 
 
@@ -226,8 +222,8 @@ def wait(seconds: float) -> Sequence[ImageContent | TextContent]:
     gui.wait(seconds)
     b64, filepath = gui.screenshot()
     return [
-        # ImageContent(type="image", data=b64, mimeType="image/png"),  # TODO: OpenCode v1.14.47-48 ImageContent 渲染回归，修复后取消注释
-        TextContent(type="text", text=f"等待 {seconds}s 并截图 → {filepath}"),
+        ImageContent(type="image", data=b64, mimeType="image/png"),
+        TextContent(type="text", text=f"等待 {seconds}s"),
     ]
 
 
@@ -240,8 +236,8 @@ def open_app(app_name: str, screenshot: bool = True    ) -> Sequence[ImageConten
     time.sleep(5)
     b64, filepath = gui.screenshot()
     return [
-        # ImageContent(type="image", data=b64, mimeType="image/png"),  # TODO: OpenCode v1.14.47-48 ImageContent 渲染回归，修复后取消注释
-        TextContent(type="text", text=f"打开应用 {app_name} 并截图 → {filepath}"),
+        ImageContent(type="image", data=b64, mimeType="image/png"),
+        TextContent(type="text", text=f"打开应用 {app_name}"),
     ]
 
 
@@ -254,8 +250,8 @@ def open_url(url: str, screenshot: bool = True    ) -> Sequence[ImageContent | T
     time.sleep(2)
     b64, filepath = gui.screenshot()
     return [
-        # ImageContent(type="image", data=b64, mimeType="image/png"),  # TODO: OpenCode v1.14.47-48 ImageContent 渲染回归，修复后取消注释
-        TextContent(type="text", text=f"打开页面 {url} 并截图 → {filepath}"),
+        ImageContent(type="image", data=b64, mimeType="image/png"),
+        TextContent(type="text", text=f"打开页面 {url}"),
     ]
 
 
